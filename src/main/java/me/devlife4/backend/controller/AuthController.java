@@ -1,5 +1,6 @@
 package me.devlife4.backend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import me.devlife4.backend.dto.request.AuthRequest;
 import me.devlife4.backend.dto.response.AuthResponse;
@@ -57,6 +58,36 @@ public class AuthController {
         throw new RuntimeException("Invalid credentials");
     }
 
+// TODO Let's just get basic authentication workflow going first then enhance with refresh functionality
+//
+//    @PostMapping("/public/refresh")
+//    public AuthResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
+//        Optional<String> tokenOpt = jwtUtils.getTokenFromRequest(request);
+//        if (tokenOpt.isEmpty()) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No token provided");
+//        }
+//
+//        String token = tokenOpt.get();
+//        try {
+//            // Validate the token and extract the username
+//            String username = jwtUtils.getUsername(token);
+//            Set<RoleTypes> roles = jwtUtils.getRoles(token);
+//
+//            // Generate a new access token
+//            String newToken = jwtUtils.generateToken(username, roles);
+//            jwtUtils.setTokenCookie(response, newToken);
+//
+//            return new AuthResponse(newToken);
+//        } catch (RuntimeException e) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+//        }
+//    }
+
+    @PostMapping("/private/logout")
+    public void logout(HttpServletResponse response) {
+        jwtUtils.clearTokenCookie(response);
+    }
+
     @GetMapping("/private/me")
     public UserResponse getAuthenticatedUser(@CookieValue(name = "JWT_TOKEN", required = false) String token) {
         if (token == null || token.isBlank()) {
@@ -73,8 +104,4 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/private/logout")
-    public void logout(HttpServletResponse response) {
-        jwtUtils.clearTokenCookie(response);
-    }
 }
