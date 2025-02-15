@@ -3,6 +3,7 @@ package me.devlife4.backend.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.devlife4.backend.dto.request.AuthRequest;
 import me.devlife4.backend.entity.User;
+import me.devlife4.backend.enums.RoleTypes;
 import me.devlife4.backend.repo.UserRepo;
 import me.devlife4.backend.security.CustomUserDetailsService;
 import me.devlife4.backend.security.JwtUtils;
@@ -17,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -75,11 +77,13 @@ class SecurityConfigIntTest {
     @Test
     void shouldAllowAccessToProtectedEndpointsWhenAuthenticated() throws Exception {
         String username = "testUser";
-        String validToken = jwtUtils.generateToken(username);
+        RoleTypes role = RoleTypes.ROLE_USER;
+        String validToken = jwtUtils.generateToken(username, Set.of(role));
 
         User user = new User();
         user.setUsername(username);
         user.setPassword("good-password");
+        user.setRoles(Set.of(RoleTypes.ROLE_USER));
 
         // Mock UserRepo and CustomUserDetailsService
         when(userRepo.findByUsername(username)).thenReturn(Optional.of(user));
@@ -101,11 +105,13 @@ class SecurityConfigIntTest {
         String username = "testUser";
         String rawPassword = "good-password";
         String hashedPassword = new BCryptPasswordEncoder().encode(rawPassword);
-        String expectedToken = jwtUtils.generateToken(username);
+        RoleTypes role = RoleTypes.ROLE_USER;
+        String expectedToken = jwtUtils.generateToken(username, Set.of(role));
 
         User mockUser = new User();
         mockUser.setUsername(username);
         mockUser.setPassword(hashedPassword);
+        mockUser.setRoles(Set.of(role));
 
         when(userRepo.findByUsername(username)).thenReturn(Optional.of(mockUser));
 

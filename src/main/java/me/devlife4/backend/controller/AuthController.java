@@ -6,6 +6,7 @@ import me.devlife4.backend.dto.response.AuthResponse;
 import me.devlife4.backend.dto.request.RegisterRequest;
 import me.devlife4.backend.dto.response.UserResponse;
 import me.devlife4.backend.entity.User;
+import me.devlife4.backend.enums.RoleTypes;
 import me.devlife4.backend.repo.UserRepo;
 import me.devlife4.backend.security.JwtUtils;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
@@ -36,7 +38,7 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepo.save(user);
 
-        String token = jwtUtils.generateToken(user.getUsername());
+        String token = jwtUtils.generateToken(user.getUsername(), Set.of(RoleTypes.ROLE_USER));
         jwtUtils.setTokenCookie(response, token); // CRITICAL REQUIREMENT
 
         return new AuthResponse(token);
@@ -47,7 +49,7 @@ public class AuthController {
         Optional<User> userOpt = userRepo.findByUsername(request.getUsername());
 
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
-            String token = jwtUtils.generateToken(userOpt.get().getUsername());
+            String token = jwtUtils.generateToken(userOpt.get().getUsername(), userOpt.get().getRoles());
             jwtUtils.setTokenCookie(response, token);
             return new AuthResponse(token);
         }

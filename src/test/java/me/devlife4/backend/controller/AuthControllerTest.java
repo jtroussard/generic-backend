@@ -5,6 +5,7 @@ import me.devlife4.backend.dto.request.RegisterRequest;
 import me.devlife4.backend.dto.response.AuthResponse;
 import me.devlife4.backend.dto.response.UserResponse;
 import me.devlife4.backend.entity.User;
+import me.devlife4.backend.enums.RoleTypes;
 import me.devlife4.backend.repo.UserRepo;
 import me.devlife4.backend.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,10 +53,11 @@ class AuthControllerTest {
         User user = new User();
         user.setUsername("testUser");
         user.setPassword("$2a$10$hashedpassword");
+        user.setRoles(Set.of(RoleTypes.ROLE_USER));
 
-        when(userRepo.findByUsername("testUser")).thenReturn(Optional.of(user));
+        when(userRepo.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "$2a$10$hashedpassword")).thenReturn(true);
-        when(jwtUtils.generateToken("testUser")).thenReturn("mocked-jwt-token");
+        when(jwtUtils.generateToken(user.getUsername(), user.getRoles())).thenReturn("mocked-jwt-token");
 
         // Act
         AuthResponse response = authController.login(request, this.response);
@@ -82,7 +85,7 @@ class AuthControllerTest {
         );
 
         assertEquals("Invalid credentials", exception.getMessage());
-        verify(jwtUtils, never()).generateToken(anyString());
+        verify(jwtUtils, never()).generateToken(anyString(), anySet());
         verify(jwtUtils, never()).setTokenCookie(any(), anyString());
     }
 
@@ -99,7 +102,7 @@ class AuthControllerTest {
         );
 
         assertEquals("Invalid credentials", exception.getMessage());
-        verify(jwtUtils, never()).generateToken(anyString());
+        verify(jwtUtils, never()).generateToken(anyString(), anySet());
         verify(jwtUtils, never()).setTokenCookie(any(), anyString());
     }
 
@@ -110,9 +113,10 @@ class AuthControllerTest {
         User newUser = new User();
         newUser.setUsername("newUser");
         newUser.setPassword("$2a$10$hashedpassword");
+        newUser.setRoles(Set.of(RoleTypes.ROLE_USER));
 
         when(userRepo.save(any(User.class))).thenReturn(newUser);
-        when(jwtUtils.generateToken("newUser")).thenReturn("mocked-jwt-token");
+        when(jwtUtils.generateToken(newUser.getUsername(), newUser.getRoles())).thenReturn("mocked-jwt-token");
 
         // Act
         AuthResponse response = authController.register(request, this.response);
