@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: Web Application Backend
+  profiles:
+    active: dev
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: 3600000 # 1 hour
