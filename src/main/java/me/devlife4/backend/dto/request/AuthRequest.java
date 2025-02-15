@@ -1,11 +1,11 @@
 package me.devlife4.backend.dto.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
+@AllArgsConstructor
 public class AuthRequest {
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 }

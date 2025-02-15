@@ -36,13 +36,20 @@ public class JwtUtils {
     }
 
     public String getUsername(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey()) // New verification approach
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("Token has expired");
+        } catch (JwtException e) {
+            throw new RuntimeException("Invalid token");
+        }
     }
+
 
     public void setTokenCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("JWT_TOKEN", token);
@@ -60,6 +67,14 @@ public class JwtUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public void clearTokenCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("JWT_TOKEN", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Expire the cookie immediately
+        response.addCookie(cookie);
     }
 }
 
