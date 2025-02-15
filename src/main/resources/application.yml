@@ -5,6 +5,6 @@ spring:
     active: dev
   security:
     jwt:
-      secret: my-secret-key
-#      secret: ${JWT_SECRET}
+      secret: "supersecureverylongrandomsecretkeythatis32byteslong"
+      #      secret: ${JWT_SECRET}
       expiration: 3600000 # 1 hour

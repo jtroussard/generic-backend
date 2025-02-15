@@ -29,7 +29,7 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/public/register")
     public AuthResponse register(@RequestBody RegisterRequest request, HttpServletResponse response) {
         User user = new User();
         user.setUsername(request.getUsername());
@@ -42,7 +42,7 @@ public class AuthController {
         return new AuthResponse(token);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/public/login")
     public AuthResponse login(@RequestBody AuthRequest request, HttpServletResponse response) {
         Optional<User> userOpt = userRepo.findByUsername(request.getUsername());
 
@@ -55,7 +55,7 @@ public class AuthController {
         throw new RuntimeException("Invalid credentials");
     }
 
-    @GetMapping("/me")
+    @GetMapping("/private/me")
     public UserResponse getAuthenticatedUser(@CookieValue(name = "JWT_TOKEN", required = false) String token) {
         if (token == null || token.isBlank()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No token provided");
@@ -71,9 +71,7 @@ public class AuthController {
         }
     }
 
-
-
-    @PostMapping("/logout")
+    @PostMapping("/private/logout")
     public void logout(HttpServletResponse response) {
         jwtUtils.clearTokenCookie(response);
     }

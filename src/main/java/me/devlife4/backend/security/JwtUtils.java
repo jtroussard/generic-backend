@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
@@ -52,10 +53,20 @@ public class JwtUtils {
 
 
     public void setTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("JWT_TOKEN", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        try {
+            System.out.println("Before Cookie creation: token=" + token);
+            Cookie cookie = new Cookie("JWT_TOKEN", token);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+
+            System.out.println("Before addCookie: " + response);
+            response.addCookie(cookie);
+            System.out.println("After addCookie: " + response);
+        } catch (Exception e) {
+            System.err.println("Exception in setTokenCookie: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-throw to fail fast
+        }
     }
 
     public Optional<String> getTokenFromRequest(HttpServletRequest request) {
