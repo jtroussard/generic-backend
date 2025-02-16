@@ -58,7 +58,7 @@ public class AuthController {
             return new AuthResponse(token);
         }
 
-        throw new RuntimeException("Invalid credentials!!");
+        throw new RuntimeException("Invalid credentials");
     }
 
 // TODO Let's just get basic authentication workflow going first then enhance with refresh functionality
