@@ -55,10 +55,19 @@ public class AuthController {
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
             String token = jwtUtils.generateToken(userOpt.get().getUsername(), userOpt.get().getRoles());
             jwtUtils.setTokenCookie(response, token);
+            log.info("[CONTROLLER] Login Success!");
             return new AuthResponse(token);
         }
 
+        log.warn("[CONTROLLER] Login Failure!");
         throw new RuntimeException("Invalid credentials");
+    }
+
+    @GetMapping("/public/hash")
+    public String hash(@RequestParam String pass, HttpServletResponse response) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPass = encoder.encode(pass);
+        return hashedPass;
     }
 
 // TODO Let's just get basic authentication workflow going first then enhance with refresh functionality

@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// TODO we need to handle a lot more in this filter. If the HTTP Method doesn't match we need to return that message (check if this is good practice)
+// TODO unknown endpoints that should result in 404 are getting processed as protected endpoints in this filter class, need to correct that.
 @Slf4j
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -45,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Skip public endpoints
         if (request.getRequestURI().matches("^/.*/public/.*$")) {
-            log.info("!![JwtAuthFilter] Public endpoint detected, skipping authentication.");
+            log.info("[FILTER] Public endpoint detected, skipping authentication.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -53,7 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Extract JWT token
         Optional<String> tokenOpt = jwtUtils.getTokenFromRequest(request);
         if (tokenOpt.isEmpty()) {
-            log.warn("!![JwtAuthFilter] Missing JWT token, rejecting request.");
+            log.warn("[FILTER] Missing JWT token, rejecting request.");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing authentication token");
             return;
         }
@@ -65,14 +67,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             username = jwtUtils.getUsername(token);
             log.info("[FILTER] Extracted username from token: {}", username);
         } catch (Exception e) {
-            log.error("!![JwtAuthFilter] Invalid JWT token: {}", e.getMessage());
+            log.error("[FILTER] Invalid JWT token");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication token");
             return;
         }
 
         // Check if authentication is already set
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            log.info("!![JwtAuthFilter] Authentication already exists for: {}, skipping.", username);
+            log.info("[FILTER] Authentication already exists for: {}, skipping.", username);
             filterChain.doFilter(request, response);
             return;
         }
@@ -93,7 +95,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toSet());
 
-        log.info("!![JwtAuthFilter] Extracted roles from JWT: {}", authorities);
+        log.info("[FILTER] Extracted roles from JWT: {}", authorities);
 
         // Set authentication in SecurityContext
         UsernamePasswordAuthenticationToken authentication =
