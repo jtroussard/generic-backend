@@ -1,0 +1,6 @@
+# src/test/resources/application-test.yml
+spring:
+  security:
+    jwt:
+      secret: test_secret_key_that_is_long_enough  # Different secret for tests
+      expiration: 60000  # Shorter expiration for tests (e.g., 1 minute)

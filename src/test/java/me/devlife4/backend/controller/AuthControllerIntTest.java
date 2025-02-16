@@ -10,7 +10,6 @@ import me.devlife4.backend.repo.UserRepo;
 import me.devlife4.backend.security.CustomUserDetailsService;
 import me.devlife4.backend.security.JwtUtils;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

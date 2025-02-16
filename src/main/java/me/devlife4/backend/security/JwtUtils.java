@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import me.devlife4.backend.enums.RoleTypes;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,10 +21,17 @@ import java.util.stream.Collectors;
 public class JwtUtils {
 
     @Value("${spring.security.jwt.secret}")
-    private String secret;
+    private final String secret;
 
     @Value("${spring.security.jwt.expiration}")
-    private long expirationMs;
+    private final long expirationMs;
+
+    @Autowired
+    public JwtUtils(@Value("${spring.security.jwt.secret}") String secret,
+                    @Value("${spring.security.jwt.expiration}") long expirationMs) {
+        this.secret = secret;
+        this.expirationMs = expirationMs;
+    }
 
     private SecretKey getSigningKey() {
         log.info("[JWT] Generating signing key using secret.");

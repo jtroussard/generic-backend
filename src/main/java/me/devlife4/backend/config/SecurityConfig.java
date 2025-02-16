@@ -35,33 +35,33 @@ public class SecurityConfig {
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
 
-        log.debug("!![SecurityConfig] AuthenticationManager initialized with DaoAuthenticationProvider");
+        log.debug("[SECURITY] AuthenticationManager initialized with DaoAuthenticationProvider");
 
         return new ProviderManager(authProvider);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        log.debug("!![SecurityConfig] Configuring SecurityFilterChain");
+        log.debug("[SECURITY] Configuring SecurityFilterChain");
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    log.debug("!![SecurityConfig] Configuring authorization rules");
+                    log.debug("[SECURITY] Configuring authorization rules");
 
                     // Public Endpoints (Open to all)
-                    log.debug("!![SecurityConfig] Public endpoints: /*/public/** → permitAll()");
+                    log.debug("[SECURITY] Public endpoints: /*/public/** → permitAll()");
                     auth.requestMatchers("/*/public/**").permitAll();
 
                     // Private Endpoints (Require authentication)
-                    log.debug("!![SecurityConfig] Private endpoints: /*/private/** → authenticated()");
+                    log.debug("[SECURITY] Private endpoints: /*/private/** → authenticated()");
                     auth.requestMatchers("/*/private/**").authenticated();
 
                     // Role-Based Endpoints (Require specific roles)
-                    log.debug("!![SecurityConfig] Role-based endpoint: /admin/** → hasAuthority(\"ADMIN\") (Spring auto-prepends ROLE_)");
+                    log.debug("[SECURITY] Role-based endpoint: /admin/** → hasAuthority(\"ROLE_ADMIN\")");
                     auth.requestMatchers("/*/admin").hasAuthority("ROLE_ADMIN");
 
-                    log.debug("!![SecurityConfig] Role-based endpoint: /user/** → hasAuthority(\"USER\") (Spring auto-prepends ROLE_)");
+                    log.debug("[SECURITY] Role-based endpoint: /user/** → hasAuthority(\"ROLE_USER\")");
                     auth.requestMatchers("/*/user/**").hasAuthority("ROLE_USER");
                 })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -11,7 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -78,10 +78,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         // Load user details
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-        log.info("[FILTER] detail service results, {}", userDetails);
-        if (userDetails == null) {
-            log.warn("!![JwtAuthFilter] User not found: {}", username);
+        UserDetails userDetails;
+        try {
+            userDetails = customUserDetailsService.loadUserByUsername(username);
+            log.info("[FILTER] detail service results, {}", userDetails);
+        } catch (UsernameNotFoundException e) {
+            log.warn("[FILTER] User not found: {}", username);
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User not authorized");
             return;
         }
