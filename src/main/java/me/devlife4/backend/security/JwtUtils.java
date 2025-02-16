@@ -26,7 +26,7 @@ public class JwtUtils {
     private long expirationMs;
 
     private SecretKey getSigningKey() {
-        log.info("!![JwtUtils] Generating signing key using secret.");
+        log.info("[JWT] Generating signing key using secret.");
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -42,7 +42,7 @@ public class JwtUtils {
     }
 
     public String getUsername(String token) {
-        log.info("!![JwtUtils] Extracting username from token: {}", token);
+        log.info("!![JWT] Extracting username from token: {}", token);
         try {
             String username = Jwts.parser()
                     .verifyWith(getSigningKey())
@@ -50,7 +50,7 @@ public class JwtUtils {
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
-            log.info("!![JwtUtils] Successfully extracted username: {}", username);
+            log.info("[JWT] Successfully extracted username: {}", username);
             return username;
         } catch (ExpiredJwtException e) {
             log.error("!![JwtUtils] Token has expired: {}", token);
@@ -101,26 +101,26 @@ public class JwtUtils {
     }
 
     public Optional<String> getTokenFromRequest(HttpServletRequest request) {
-        log.info("!![JwtUtils] Extracting token from request.");
+        log.info("[JWT] Extracting token from request.");
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("JWT_TOKEN".equals(cookie.getName())) {
-                    log.info("!![JwtUtils] Found token in cookie: {}", cookie.getValue());
+                    log.info("!![JWT] Found token in cookie: {}", cookie.getValue());
                     return Optional.of(cookie.getValue());
                 }
             }
         }
-        log.info("!![JwtUtils] No token found in request.");
+        log.info("[JWT] No token found in request.");
         return Optional.empty();
     }
 
     public void clearTokenCookie(HttpServletResponse response) {
-        log.info("!![JwtUtils] Clearing token cookie.");
+        log.info("[JWT] Clearing token cookie.");
         Cookie cookie = new Cookie("JWT_TOKEN", "");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(0); // Expire the cookie immediately
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
-        log.info("!![JwtUtils] Token cookie cleared successfully.");
+        log.info("[JWT] Token cookie cleared successfully.");
     }
 }

@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Autowired
-    public JwtAuthFilter(JwtUtils jwtUtils, UserDetailsService userDetailsService) {
+    public JwtAuthFilter(JwtUtils jwtUtils, CustomUserDetailsService customUserDetailsService) {
         this.jwtUtils = jwtUtils;
-        this.userDetailsService = userDetailsService;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // Log request URI
-        log.info("!![JwtAuthFilter] Filtering request: {}", request.getRequestURI());
+        log.info("[FILTER] Filtering request: {}", request.getRequestURI());
 
         // Skip public endpoints
         if (request.getRequestURI().matches("^/.*/public/.*$")) {
@@ -63,7 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             username = jwtUtils.getUsername(token);
-            log.info("!![JwtAuthFilter] Extracted username from token: {}", username);
+            log.info("[FILTER] Extracted username from token: {}", username);
         } catch (Exception e) {
             log.error("!![JwtAuthFilter] Invalid JWT token: {}", e.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication token");
@@ -78,7 +78,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         // Load user details
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        log.info("[FILTER] detail service results, {}", userDetails);
         if (userDetails == null) {
             log.warn("!![JwtAuthFilter] User not found: {}", username);
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User not authorized");

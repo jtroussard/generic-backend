@@ -10,6 +10,8 @@ import me.devlife4.backend.entity.User;
 import me.devlife4.backend.enums.RoleTypes;
 import me.devlife4.backend.repo.UserRepo;
 import me.devlife4.backend.security.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.Set;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final UserRepo userRepo;
     private final JwtUtils jwtUtils;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -55,7 +58,7 @@ public class AuthController {
             return new AuthResponse(token);
         }
 
-        throw new RuntimeException("Invalid credentials");
+        throw new RuntimeException("Invalid credentials!!");
     }
 
 // TODO Let's just get basic authentication workflow going first then enhance with refresh functionality
@@ -85,6 +88,7 @@ public class AuthController {
 
     @PostMapping("/private/logout")
     public void logout(HttpServletResponse response) {
+        log.info("[AUTH] User logging out.");
         jwtUtils.clearTokenCookie(response);
     }
 
